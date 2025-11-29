@@ -136,3 +136,73 @@ def get_open_meteo_data(city_input):
     }
 
     return mapped_data
+
+
+def fetch_and_map_weather(lat, lon, timezone_str="Europe/Warsaw"):
+    """
+    Pobiera dane dla konkretnych współrzędnych i mapuje do schematu.
+    Zwraca słownik gotowy do zapisu w modelu WeatherLog.
+    """
+    # URL Forecast (zawiera current, hourly i daily)
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "current": "temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,wind_direction_10m,rain,snowfall,cloud_cover,weather_code",
+        "hourly": "rain,snowfall",
+        "daily": "temperature_2m_max,temperature_2m_min",
+        "timezone": timezone_str,
+        "forecast_days": 1
+    }
+
+    try:
+        resp = requests.get(url, params=params, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        print(f"Błąd API dla {lat}, {lon}: {e}")
+        return None
+
+    curr = data['current']
+    daily = data['daily']
+    hourly = data['hourly']
+
+    # Logika daty
+    local_tz = pytz.timezone(timezone_str)
+    dt_obj = datetime.datetime.fromisoformat(curr['time'])
+    dt_aware = local_tz.localize(dt_obj)
+    dt_iso_str = dt_aware.strftime('%Y-%m-%d %H:%M:%S%z')
+    if dt_iso_str[-3] != ':':
+        dt_iso_str = dt_iso_str[:-2] + ':' + dt_iso_str[-2:]
+
+    # Logika sumy opadów 3h
+    try:
+        current_hour_idx = hourly['time'].index(curr['time'])
+        start_idx = max(0, current_hour_idx - 2)
+        rain_3h = sum(hourly['rain'][start_idx : current_hour_idx + 1])
+        snow_3h = sum(hourly['snowfall'][start_idx : current_hour_idx + 1])
+    except ValueError:
+        rain_3h = 0.0
+        snow_3h = 0.0
+
+    wmo_code = curr['weather_code']
+    w_main, w_desc, w_icon = get_wmo_description(wmo_code)
+
+    return {
+        'dt_iso': dt_iso_str,
+        'temp': curr['temperature_2m'],
+        'temp_min': daily['temperature_2m_min'][0],
+        'temp_max': daily['temperature_2m_max'][0],
+        'pressure': curr['surface_pressure'],
+        'humidity': curr['relative_humidity_2m'],
+        'wind_speed': curr['wind_speed_10m'],
+        'wind_deg': curr['wind_direction_10m'],
+        'rain_1h': curr['rain'],
+        'rain_3h': round(rain_3h, 2),
+        'snow_3h': round(snow_3h, 2),
+        'clouds_all': curr['cloud_cover'],
+        'weather_id': wmo_code,
+        'weather_main': w_main,
+        'weather_description': w_desc,
+        'weather_icon': w_icon
+    }
