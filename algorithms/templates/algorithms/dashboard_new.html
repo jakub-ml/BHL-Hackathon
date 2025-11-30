@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OSM Map</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* center content horizontally */
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    #map {
+      height: 400px;     /* taller for more square shape */
+      width: 400px;      /* fixed width to make it square */
+      max-width: 80%;    /* responsive for smaller screens */
+      margin-bottom: 30px;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+    }
+
+    .cta-primary {
+      padding: 25px 60px;
+      font-size: 1.5em;
+      background: linear-gradient(45deg, #28a745, #2ecc71); /* green gradient */
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-weight: 600;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .cta-primary:hover {
+      background: linear-gradient(45deg, #2ecc71, #28a745); /* reversed gradient on hover */
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <button class="cta-primary" type="button" onclick="goToX()">Rozpocznij Nową Analizę</button>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Create the map
+    var map = L.map('map').setView([51.505, -0.09], 13);
+
+    // Add OSM tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Dummy function for the button
+    function goToX() {
+      window.location.href =  "/algorithms/weather/";
+    }
+  </script>
+</body>
+</html>
