@@ -31,10 +31,18 @@
 
     {% if weather_data %}
         <div class="prediction-box">
-            <h3>Wynik Modelu ML:</h3>
-            <p style="font-size: 1.2em;">{{ prediction }}</p>
-        </div>
+          <h3>Wynik Modelu ML:</h3>
 
+          {% if prediction %}
+            {% for p in prediction %}
+              <p style="font-size:1.2em;">
+                Predykcja: {{ p.prediction }} — Log ID: {{ p.weather_log.id }}
+              </p>
+            {% endfor %}
+          {% else %}
+            <p>Brak predykcji w bazie.</p>
+          {% endif %}
+        </div>
         <h3>Dane wejściowe (zmapowane do schematu):</h3>
         <table class="data-table">
             <thead>

@@ -4,7 +4,7 @@ from .services import get_open_meteo_data  # Zmieniona nazwa funkcji
 from .ml_model import WeatherPredictor
 from django.template import loader
 from django.http import HttpResponse
-
+from .models import Prediction
 
 def weather_dashboard(request):
     context = {}
@@ -15,7 +15,7 @@ def weather_dashboard(request):
         weather_data = get_open_meteo_data(city_input)
 
         if weather_data:
-            prediction_result = WeatherPredictor.predict(weather_data)
+            prediction_result = Prediction.objects.all()
 
             context = {
                 'weather_data': weather_data,

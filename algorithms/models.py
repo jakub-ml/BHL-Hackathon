@@ -35,3 +35,17 @@ class WeatherLog(models.Model):
 
     def __str__(self):
         return f"{self.location.city_name} - {self.dt_iso}"
+
+
+class Prediction(models.Model):
+    # Relacja do WeatherLog - to pole łączy predykcję z konkretnym logiem
+    weather_log = models.OneToOneField(
+        WeatherLog,
+        on_delete=models.CASCADE,
+        related_name='prediction_data'
+    )
+    # Pole z wartością predykcji (float)
+    prediction = models.FloatField()
+
+    def __str__(self):
+        return f"Pred: {self.prediction} for Log {self.weather_log_id}"
