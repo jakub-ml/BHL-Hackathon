@@ -274,7 +274,7 @@
                 <h2 class="center-text">Dane Techniczne</h2>
                 <p class="center-text" style="margin-bottom: 30px;">Wprowadź szczegóły swojego zadania obliczeniowego.</p>
 
-                <form id="ai-form">
+                <form onsubmit="event.preventDefault(); navigateTo('view-results');">
                     <label>Liczba parametrów modelu (w mln)</label>
                     <input type="number" placeholder="np. 7000" required>
 
@@ -285,7 +285,26 @@
                         <button id="analyzeBtn" type="submit" class="cta-primary" style="width: 100%;">Analizuj</button>
                     </div>
 
+                    <script>
+                    document.getElementById('analyzeBtn').addEventListener('click', () => {
+                        const state = "STARTMODEL";
 
+                        fetch('http://localhost:8080/state', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'text/plain'
+                            },
+                            body: state
+                        })
+                        .then(response => response.text())
+                        .then(data => {
+                            document.getElementById('response').textContent = 'Server response: ' + data;
+                        })
+                        .catch(err => {
+                            document.getElementById('response').textContent = 'Error: ' + err;
+                        });
+                    });
+                    </script>
                 </form>
             </div>
             <button class="back-btn" onclick="navigateTo('view-selection')">← Wróć</button>
@@ -298,7 +317,7 @@
                 <h2 class="center-text">Asystent AI</h2>
                 <p class="center-text" style="margin-bottom: 30px;">Wklej opis lub fragment kodu, a my zajmiemy się resztą.</p>
 
-                <form id="ai-form2">
+                <form onsubmit="event.preventDefault(); navigateTo('view-results');">
                     <label>Opisz co robi Twój kod / wklej fragment</label>
                     <textarea placeholder="Mój kod trenuje sieć neuronową do rozpoznawania obrazów przy użyciu biblioteki PyTorch..." required></textarea>
 
@@ -307,63 +326,30 @@
                     </div>
 
                     <script>
-                    document.getElementById('ai-form2').addEventListener('submit', function(event) {
-                        event.preventDefault();
+                    document.getElementById('analyzeBtn2').addEventListener('click', () => {
+                        const state = "STARTMODEL";
 
-                        const textarea = document.querySelector('#ai-form2 textarea').value;
-
-                        fetch('/algorithms/run-ai/', {
+                        fetch('http://localhost:8080/state', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'text/plain',
-                                'X-CSRFToken': getCookie('csrftoken')
+                                'Content-Type': 'text/plain'
                             },
-                            body: textarea
+                            body: state
                         })
-                        .then(response => response.json())
+                        .then(response => response.text())
                         .then(data => {
-                            document.getElementById('response').textContent =
-                                'Wynik AI: ' + data.result;
+                            document.getElementById('response').textContent = 'Server response: ' + data;
                         })
                         .catch(err => {
-                            document.getElementById('response').textContent = 'Błąd: ' + err;
+                            document.getElementById('response').textContent = 'Error: ' + err;
                         });
                     });
-
-                    function getCookie(name) {
-                        let cookieValue = null;
-                        if (document.cookie && document.cookie !== '') {
-                            const cookies = document.cookie.split(';');
-                            for (let i = 0; i < cookies.length; i++) {
-                                const cookie = cookies[i].trim();
-                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                                    break;
-                                }
-                            }
-                        }
-                        return cookieValue;
-                    }
                     </script>
                 </form>
             </div>
             <button class="back-btn" onclick="navigateTo('view-selection')">← Wróć</button>
         </div>
     </div>
-
-    <div id="view-loading" style="position:fixed; top:0; left:0; width:100%; height:100%;
-    display:flex; justify-content:center; align-items:center; background:rgba(255,255,255,0.8);
-    z-index:9999; visibility:hidden; opacity:0; transition:opacity 0.3s;">
-    <span style="font-size:4em; display:inline-block; animation:spin 1s linear infinite;">⏳</span>
-    </div>
-
-    <style>
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    </style>
-
 
     <div id="view-results" class="view-section">
         <div class="page-container">
@@ -373,30 +359,17 @@
                 <p>Oto przykładowy raport wygenerowany dla Twoich danych.</p>
 
                 <div style="background: #f0fdf4; padding: 20px; border-radius: 10px; margin: 30px 0; border: 1px solid #bbf7d0; text-align: left;">
-                  <h4 style="margin-top: 0; color: #166534;">Podsumowanie Emisji (posortowane: najmniejsza najpierw):</h4>
-                  <ul style="list-style: none; padding: 0;">
-                    {% if prediction %}
-                      {% for p in prediction %}
-                        <li style="font-size:1.05em; margin-bottom:10px; padding:8px; border-radius:6px; background:#ffffff; border:1px solid #e6f4ea;">
-                          <strong>Miejsce:</strong>
-                            {{ p.weather_log.location.city_name }}
-                          <br>
-                          <strong>Koszt przewidziany:</strong>
-                            {{ p.prediction|floatformat:2 }}
-                        </li>
-                      {% endfor %}
-                    {% else %}
-                      <p>Brak predykcji w bazie.</p>
-                    {% endif %}
-                  </ul>
+                    <h4 style="margin-top: 0; color: #166534;">Podsumowanie Emisji:</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>📉 <strong>Szacowana emisja:</strong> 4.2 kg CO2e</li>
+                        <li>⚡ <strong>Zużycie energii:</strong> 12.5 kWh</li>
+                        <li>🌱 <strong>Rekomendacja:</strong> Użyj regionu `eu-north-1` (Szwecja) - 100% OZE.</li>
+                    </ul>
                 </div>
-                <div id="response" style="margin-top:20px; font-weight:600;"></div>
-
-
 
                 <p style="font-size: 0.9em;">To jest strona demonstracyjna. W pełnej wersji tutaj pojawiłby się szczegółowy dashboard.</p>
 
-                <button class="cta-primary" type="submit" onclick="rel('view-home')">Rozpocznij Nową Analizę</button>
+                <button class="cta-primary" onclick="navigateTo('view-home')">Rozpocznij Nową Analizę</button>
             </div>
         </div>
     </div>
@@ -420,60 +393,7 @@
                 console.error("Nie znaleziono widoku o ID:", viewId);
             }
         }
-
-        function rel(viewId) {
-            // 1. Ukryj wszystkie sekcje z klasą .view-section
-            location.reload()
-        }
     </script>
 
-    <script>
-    function showLoading() {
-    const loading = document.getElementById('view-loading');
-    loading.style.visibility = 'visible';
-    loading.style.opacity = 1;
-    }
-
-    function hideLoading() {
-        const loading = document.getElementById('view-loading');
-        loading.style.opacity = 0;
-        setTimeout(() => loading.style.visibility = 'hidden', 300); // match transition
-    }
-
-    document.getElementById('ai-form').addEventListener('submit', async function(event) {
-        event.preventDefault(); // stop default form submission
-        showLoading();
-
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        hideLoading();
-
-        navigateTo('view-results');
-    });
-    </script>
-
-    <script>
-        function showLoading() {
-        const loading = document.getElementById('view-loading');
-        loading.style.visibility = 'visible';
-        loading.style.opacity = 1;
-        }
-
-        function hideLoading() {
-            const loading = document.getElementById('view-loading');
-            loading.style.opacity = 0;
-            setTimeout(() => loading.style.visibility = 'hidden', 300); // match transition
-        }
-
-        document.getElementById('ai-form2').addEventListener('submit', async function(event) {
-            event.preventDefault(); // stop default form submission
-            showLoading();
-
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            hideLoading();
-            navigateTo('view-results');
-        });
-    </script>
 </body>
 </html>
