@@ -365,42 +365,6 @@
     </style>
 
 
-    <div id="view-results" class="view-section">
-        <div class="page-container">
-            <div class="form-card" style="text-align: center;">
-                <span style="font-size: 4em;">🎉</span>
-                <h2>Analiza Zakończona!</h2>
-                <p>Oto przykładowy raport wygenerowany dla Twoich danych.</p>
-
-                <div style="background: #f0fdf4; padding: 20px; border-radius: 10px; margin: 30px 0; border: 1px solid #bbf7d0; text-align: left;">
-                  <h4 style="margin-top: 0; color: #166534;">Podsumowanie Emisji (posortowane: najmniejsza najpierw):</h4>
-                  <ul style="list-style: none; padding: 0;">
-                    {% if prediction %}
-                      {% for p in prediction %}
-                        <li style="font-size:1.05em; margin-bottom:10px; padding:8px; border-radius:6px; background:#ffffff; border:1px solid #e6f4ea;">
-                          <strong>Miejsce:</strong>
-                            {{ p.weather_log.location.city_name }}
-                          <br>
-                          <strong>Koszt przewidziany:</strong>
-                            {{ p.prediction|floatformat:2 }}
-                        </li>
-                      {% endfor %}
-                    {% else %}
-                      <p>Brak predykcji w bazie.</p>
-                    {% endif %}
-                  </ul>
-                </div>
-                <div id="response" style="margin-top:20px; font-weight:600;"></div>
-
-
-
-                <p style="font-size: 0.9em;">To jest strona demonstracyjna. W pełnej wersji tutaj pojawiłby się szczegółowy dashboard.</p>
-
-                <button class="cta-primary" type="submit" onclick="rel('view-home')">Rozpocznij Nową Analizę</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Funkcja do przełączania widoków
         function navigateTo(viewId) {
@@ -448,7 +412,7 @@
 
         hideLoading();
 
-         window.location.href = "dashboard_old.html";
+        window.location.href = "dashboard_old.html";
     });
     </script>
 
@@ -472,7 +436,7 @@
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             hideLoading();
-            window.location.href = "dashboard_old.html;
+            window.location.href = "dashboard_old.html";
         });
     </script>
 </body>
