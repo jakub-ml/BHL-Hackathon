@@ -80,9 +80,9 @@
 
         /* --- HERO & HOME STYLES --- */
         .hero-section {
-            background: linear-gradient(-45deg, #A8E6CF, #d4fcff, #e3ffe7, #f0fdf4);
+            background: linear-gradient(-45deg, #A8E6CF, #C3A8E6, #6BE79C, #5E399C);
             background-size: 400% 400%;
-            animation: backgroundFlow 15s ease infinite;
+            animation: backgroundFlow 10s ease infinite;
             padding: 100px 0;
             text-align: center;
             min-height: 85vh;
@@ -274,7 +274,7 @@
                 <h2 class="center-text">Dane Techniczne</h2>
                 <p class="center-text" style="margin-bottom: 30px;">Wprowadź szczegóły swojego zadania obliczeniowego.</p>
                 
-                <form onsubmit="event.preventDefault(); navigateTo('view-results');">
+                <form id="ai-form">
                     <label>Liczba parametrów modelu (w mln)</label>
                     <input type="number" placeholder="np. 7000" required>
                     
@@ -282,8 +282,29 @@
                     <input type="number" placeholder="np. 500" required>
                     
                     <div style="text-align: center; margin-top: 40px;">
-                        <button type="submit" class="cta-primary" style="width: 100%;">Analizuj</button>
+                        <button id="analyzeBtn" type="submit" class="cta-primary" style="width: 100%;">Analizuj</button>
                     </div>
+
+                    <script>
+                    document.getElementById('analyzeBtn').addEventListener('click', () => {
+                        const state = "STARTMODEL";
+
+                        fetch('http://localhost:8080/state', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'text/plain'
+                            },
+                            body: state
+                        })
+                        .then(response => response.text())
+                        .then(data => {
+                            document.getElementById('response').textContent = 'Server response: ' + data;
+                        })
+                        .catch(err => {
+                            document.getElementById('response').textContent = 'Error: ' + err;
+                        });
+                    });
+                    </script>
                 </form>
             </div>
             <button class="back-btn" onclick="navigateTo('view-selection')">← Wróć</button>
@@ -296,18 +317,53 @@
                 <h2 class="center-text">Asystent AI</h2>
                 <p class="center-text" style="margin-bottom: 30px;">Wklej opis lub fragment kodu, a my zajmiemy się resztą.</p>
                 
-                <form onsubmit="event.preventDefault(); navigateTo('view-results');">
+                <form id="ai-form2">
                     <label>Opisz co robi Twój kod / wklej fragment</label>
                     <textarea placeholder="Mój kod trenuje sieć neuronową do rozpoznawania obrazów przy użyciu biblioteki PyTorch..." required></textarea>
                     
                     <div style="text-align: center; margin-top: 40px;">
-                        <button type="submit" class="cta-primary" style="width: 100%;">Analizuj z AI</button>
+                        <button id="analyzeBtn2" type="submit" class="cta-primary" style="width: 100%;">Analizuj z AI</button>
                     </div>
+
+                    <script>
+                    document.getElementById('analyzeBtn2').addEventListener('click', () => {
+                        const state = "STARTMODEL";
+
+                        fetch('http://localhost:8080/state', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'text/plain'
+                            },
+                            body: state
+                        })
+                        .then(response => response.text())
+                        .then(data => {
+                            document.getElementById('response').textContent = 'Server response: ' + data;
+                        })
+                        .catch(err => {
+                            document.getElementById('response').textContent = 'Error: ' + err;
+                        });
+                    });
+                    </script>
                 </form>
             </div>
             <button class="back-btn" onclick="navigateTo('view-selection')">← Wróć</button>
         </div>
     </div>
+
+    <div id="view-loading" style="position:fixed; top:0; left:0; width:100%; height:100%;
+    display:flex; justify-content:center; align-items:center; background:rgba(255,255,255,0.8);
+    z-index:9999; visibility:hidden; opacity:0; transition:opacity 0.3s;">
+    <span style="font-size:4em; display:inline-block; animation:spin 1s linear infinite;">⏳</span>
+    </div>
+
+    <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    </style>
+
 
     <div id="view-results" class="view-section">
         <div class="page-container">
@@ -315,7 +371,7 @@
                 <span style="font-size: 4em;">🎉</span>
                 <h2>Analiza Zakończona!</h2>
                 <p>Oto przykładowy raport wygenerowany dla Twoich danych.</p>
-                
+
                 <div style="background: #f0fdf4; padding: 20px; border-radius: 10px; margin: 30px 0; border: 1px solid #bbf7d0; text-align: left;">
                     <h4 style="margin-top: 0; color: #166534;">Podsumowanie Emisji:</h4>
                     <ul style="list-style: none; padding: 0;">
@@ -326,7 +382,7 @@
                 </div>
 
                 <p style="font-size: 0.9em;">To jest strona demonstracyjna. W pełnej wersji tutaj pojawiłby się szczegółowy dashboard.</p>
-                
+
                 <button class="cta-primary" onclick="navigateTo('view-home')">Rozpocznij Nową Analizę</button>
             </div>
         </div>
@@ -353,5 +409,53 @@
         }
     </script>
 
+    <script>
+    function showLoading() {
+    const loading = document.getElementById('view-loading');
+    loading.style.visibility = 'visible';
+    loading.style.opacity = 1;
+    }
+
+    function hideLoading() {
+        const loading = document.getElementById('view-loading');
+        loading.style.opacity = 0;
+        setTimeout(() => loading.style.visibility = 'hidden', 300); // match transition
+    }
+
+    document.getElementById('ai-form').addEventListener('submit', async function(event) {
+        event.preventDefault(); // stop default form submission
+        showLoading();
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        hideLoading();
+
+        navigateTo('view-results');
+    });
+    </script>
+
+    <script>
+        function showLoading() {
+        const loading = document.getElementById('view-loading');
+        loading.style.visibility = 'visible';
+        loading.style.opacity = 1;
+        }
+
+        function hideLoading() {
+            const loading = document.getElementById('view-loading');
+            loading.style.opacity = 0;
+            setTimeout(() => loading.style.visibility = 'hidden', 300); // match transition
+        }
+
+        document.getElementById('ai-form2').addEventListener('submit', async function(event) {
+            event.preventDefault(); // stop default form submission
+            showLoading();
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            hideLoading();
+            navigateTo('view-results');
+        });
+    </script>
 </body>
 </html>
