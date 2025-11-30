@@ -5,6 +5,8 @@ from django.template import loader
 from django.http import HttpResponse, JsonResponse
 from .models import Prediction
 from .agents.askAgents import askAgents
+import json
+
 def weather_dashboard(request):
     context = {}
 
@@ -47,3 +49,24 @@ def run_ai_analysis(request):
         return JsonResponse({"result": result})
 
     return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+def calc_api(request):
+    data = json.loads(request.body)
+
+    params = float(data["params"])
+    dataset = float(data["dataset"])
+
+    # Twoje predykcje z bazy
+    predictions = Prediction.objects.all()
+
+    results = []
+    for p in predictions:
+        multiplied = p.prediction * params * dataset
+        results.append({
+            "city": p.weather_log.location.city_name,
+            "prediction": p.prediction,
+            "multiplied": multiplied
+        })
+    print(results)
+    return JsonResponse({"results": results})
+
