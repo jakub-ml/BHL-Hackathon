@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Open-Meteo ML App</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .data-table { border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 0.9em; }
+        .data-table td, .data-table th { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .data-table th { background-color: #f2f2f2; }
+        .prediction-box { background-color: #e3f2fd; padding: 15px; border-left: 5px solid #2196f3; margin-top: 20px; }
+        .input-group { margin-bottom: 20px; }
+        input[type="text"] { padding: 8px; width: 200px; }
+        button { padding: 8px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>Panel Predykcji (Open-Meteo Source)</h1>
+
+    <form method="POST" class="input-group">
+        {% csrf_token %}
+        <label for="city">Wybierz region (Miasto):</label>
+        <input type="text" name="city" id="city" placeholder="np. Kraków" required>
+        <button type="submit">Pobierz dane</button>
+    </form>
+
+    {% if error %}
+        <p style="color: red; font-weight: bold;">{{ error }}</p>
+    {% endif %}
+
+    {% if weather_data %}
+        <div class="prediction-box">
+            <h3>Wynik Modelu ML:</h3>
+            <p style="font-size: 1.2em;">{{ prediction }}</p>
+        </div>
+
+        <h3>Dane wejściowe (zmapowane do schematu):</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Kolumna (Feature)</th>
+                    <th>Wartość</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key, value in weather_data.items %}
+                <tr>
+                    <td><strong>{{ key }}</strong></td>
+                    <td>{{ value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+</body>
+</html>
